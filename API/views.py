@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from .serializer import *
-from .services.suap_auth import autenticar_suap
+from .services.suap_auth import AutenticacaoSuap
 from rest_framework.response import Response
 from rest_framework import status
 from .models import *
@@ -30,68 +30,19 @@ class LoginSuapView(APIView):
         if not matricula or not senha:
             return Response({"detail": "Credenciais inválidas."}, status=status.HTTP_400_BAD_REQUEST)
 
-        autenticacao = autenticar_suap(matricula, senha)
-        data = autenticacao["data"]
+
+        autenticacao = AutenticacaoSuap.autenticar_suap(matricula, senha)
+        data = AutenticacaoSuap.dados(autenticacao,matricula) # ainda não testei isso
         refresh = autenticacao["refresh"]
         headers = autenticacao["headers"]
         access = autenticacao["access"]
-        periodo = autenticacao["periodo"]
-        nome = data.get("nome_usual")
-        tipo_vinculo = data.get("tipo_vinculo")
-        cpf = data.get("cpf")
-        data = data.get("vinculo", {}) # dados mais detalhados estao dentro de vinculos no json 
-        print(tipo_vinculo)
-
-        if not autenticacao:
-            return Response({"detail": "Falha de autenticação."}, status=status.HTTP_401_UNAUTHORIZED)
-        # vai criar ou recuperar um usuario com o nome passado 
-        usuario, created = Usuario.objects.get_or_create( # isso tem que mudar depois pq estou pegando o nome usual no suap e nao o nome completo
-            nome = nome
-        )
-
-        if not usuario and created: # para caso seja criado um usuario no banco
-            usuario = created
-
-        print(f"""
-        --- Aluno Info ---
-            Matrícula: {matricula}
-            CPF: {cpf}
-            Curso: {data.get("curso")}
-            Status: {data.get("situacao")}
-            Período Atual: {periodo.get("count")}
-            --------------------
-            """
-        )
-
-        # isso aqui tem que ajeitar 
-        # verifica se o aluno tem vinculo de aluno 
-        # if "aluno" in tipo_vinculo.lower(): 
-        #     print("is aluno")
-        #     Aluno.objects.update_or_create( #  update pq dados como status e periodos podem mudar 
-        #         usuario = usuario,
-        #         defaults = {
-        #             "matricula": matricula,
-        #             "cpf": cpf,
-        #             "curso": data.get("curso"),
-        #             "status": data.get("situacao"),
-        #             "periodo": periodo.get("count"),
-        #         }
-        #     )
         
-        try:
-            aluno = Aluno.objects.get(matricula = matricula)
-        except Aluno.DoesNotExist:
-            aluno = None
+        if not data:
+            return Response({"detail": "Usuário não encontrado"}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({
             "access": access,
             "refresh": refresh,
             "headers": headers,
-            "usuario": AlunoSerializer(aluno).data if aluno else None,
-            "matricula": matricula,
-            "cpf": cpf,
-            "curso": data.get("curso"),
-            "status": data.get("situacao"),
-            "periodo": periodo.get("count"),
-            "tipo_usuario": tipo_vinculo
+            "data" : data
         }, status=status.HTTP_200_OK)
