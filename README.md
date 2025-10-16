@@ -29,14 +29,14 @@ Acesse <https://suap.ifrn.edu.br/admin/api/aplicacaooauth2/> e crie a apliação
 | Campo                    | Valor                                  |
 |--------------------------|----------------------------------------|
 | Name                     | <Nome da sua aplicação>                |
-| Authorization Grant Type | Authorization Code                     |
+| Authorization Grant Type | Implicit                   |
 | Redirect URIs            | <http://127.0.0.1:8000/complete/suap/> |
 | Client Type              | Confidential                           |
 | Algorithm                | No OIDC Support                        |
 | Ativo                    | :white_check_mark:                     |
 
 Em **Redirect URIs**, você também pode adicionar o endereço do servidor externo, caso ele esteja hospedado na nuvem. No valor definido acima, o servidor está rodando localmente (localhost).
-
+Após a criação da aplicação, altere o **Authorization Grant Type** de Implicit para Authorization code, isso porque o SUAP bloqueia a criação usando Authorization code, mas permite criar usando implicit e depois realizar a alteração.
 Lembre-se de anotar as chaves **Client ID** e **Client Secret** antes de salvar a aplicação, pois esta última só pode ser visualizada no ato de criação.
 
 ### Instalação e Configuração
