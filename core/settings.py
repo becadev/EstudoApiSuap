@@ -98,3 +98,6 @@ LOGIN_URL = "app:login"
 # Credenciais da aplicação do SUAP
 SOCIAL_AUTH_SUAP_KEY = env.str("SOCIAL_AUTH_SUAP_KEY")
 SOCIAL_AUTH_SUAP_SECRET = env.str("SOCIAL_AUTH_SUAP_SECRET")
+# ...existing code...
+SOCIAL_AUTH_SUAP_REDIRECT_URI = "http://localhost:8000/complete/suap/"
+# ...existing code...
